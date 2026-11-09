@@ -1,6 +1,6 @@
 // Service worker do Bolso Feliz: permite instalar o app e abrir a tela mesmo com internet ruim.
 // Os dados (Supabase) nunca são guardados aqui: só os arquivos do próprio app.
-const CACHE = "bolso-feliz-v2";
+const CACHE = "bolso-feliz-v3";
 const ARQUIVOS = [
   "./", "./index.html", "./config.js", "./config.js?v=2", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png", "./icons/favicon-32.png"

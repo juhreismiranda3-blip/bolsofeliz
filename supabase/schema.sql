@@ -1,6 +1,7 @@
 -- =========================================================
 --  BOLSO FELIZ — estrutura do banco de dados (Supabase)
 --  Cole tudo no SQL Editor do Supabase e clique em "Run".
+--  Depois siga os PASSOS 2 e 3 lá no final.
 --  Pode rodar de novo sem medo: não apaga dados existentes.
 -- =========================================================
 
@@ -53,68 +54,49 @@ insert into public.config (id) values (1) on conflict (id) do nothing;
 create index if not exists entradas_mes_idx on public.entradas (mes);
 create index if not exists contas_mes_idx   on public.contas (mes);
 
--- 6) Função que diz se quem está logado é do casal
-create or replace function public.eh_membro()
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1 from public.membros
-    where lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
-  );
-$$;
-revoke all on function public.eh_membro() from public, anon;
-grant execute on function public.eh_membro() to authenticated;
-
--- 7) Segurança: liga o RLS e só deixa membros lerem e gravarem
+-- 6) Segurança: liga o RLS e só deixa membros lerem e gravarem
+--    (sem funções nem blocos "do", porque o SQL Editor do Supabase
+--     confere o texto antes de rodar e recusa esses comandos)
 alter table public.membros  enable row level security;
 alter table public.entradas enable row level security;
 alter table public.contas   enable row level security;
 alter table public.dividas  enable row level security;
 alter table public.config   enable row level security;
 
--- (a tabela membros não tem política: ninguém lê nem altera pelo app,
---  só você pelo painel do Supabase)
+-- Cada pessoa logada só enxerga a própria linha em membros (é assim que o app sabe se ela é do casal)
+drop policy if exists "membro ve o proprio email" on public.membros;
+create policy "membro ve o proprio email" on public.membros
+  for select to authenticated using (lower(email) = lower(coalesce(auth.jwt() ->> 'email', '')));
 
 drop policy if exists "membros acessam entradas" on public.entradas;
 create policy "membros acessam entradas" on public.entradas
-  for all to authenticated using (public.eh_membro()) with check (public.eh_membro());
+  for all to authenticated using (exists (select 1 from public.membros m where lower(m.email) = lower(coalesce(auth.jwt() ->> 'email', '')))) with check (exists (select 1 from public.membros m where lower(m.email) = lower(coalesce(auth.jwt() ->> 'email', ''))));
 
 drop policy if exists "membros acessam contas" on public.contas;
 create policy "membros acessam contas" on public.contas
-  for all to authenticated using (public.eh_membro()) with check (public.eh_membro());
+  for all to authenticated using (exists (select 1 from public.membros m where lower(m.email) = lower(coalesce(auth.jwt() ->> 'email', '')))) with check (exists (select 1 from public.membros m where lower(m.email) = lower(coalesce(auth.jwt() ->> 'email', ''))));
 
 drop policy if exists "membros acessam dividas" on public.dividas;
 create policy "membros acessam dividas" on public.dividas
-  for all to authenticated using (public.eh_membro()) with check (public.eh_membro());
+  for all to authenticated using (exists (select 1 from public.membros m where lower(m.email) = lower(coalesce(auth.jwt() ->> 'email', '')))) with check (exists (select 1 from public.membros m where lower(m.email) = lower(coalesce(auth.jwt() ->> 'email', ''))));
 
 drop policy if exists "membros leem config" on public.config;
 create policy "membros leem config" on public.config
-  for select to authenticated using (public.eh_membro());
+  for select to authenticated using (exists (select 1 from public.membros m where lower(m.email) = lower(coalesce(auth.jwt() ->> 'email', ''))));
 
 drop policy if exists "membros alteram config" on public.config;
 create policy "membros alteram config" on public.config
-  for update to authenticated using (public.eh_membro()) with check (public.eh_membro());
-
--- 8) Atualização ao vivo (um vê na hora o que o outro anotou)
-do $$
-declare t text;
-begin
-  foreach t in array array['entradas','contas','dividas','config'] loop
-    if not exists (
-      select 1 from pg_publication_tables
-      where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = t
-    ) then
-      execute format('alter publication supabase_realtime add table public.%I', t);
-    end if;
-  end loop;
-end $$;
+  for update to authenticated using (exists (select 1 from public.membros m where lower(m.email) = lower(coalesce(auth.jwt() ->> 'email', '')))) with check (exists (select 1 from public.membros m where lower(m.email) = lower(coalesce(auth.jwt() ->> 'email', ''))));
 
 -- =========================================================
---  ÚLTIMO PASSO: troque os e-mails abaixo pelos de vocês dois
+--  PASSO 2: atualização ao vivo (um vê na hora o que o outro anotou)
+--  Rode só esta linha, separada. Se disser que a tabela "já é membro"
+--  da publicação (already member), está tudo certo, pode ignorar.
+-- =========================================================
+-- alter publication supabase_realtime add table public.entradas, public.contas, public.dividas, public.config;
+
+-- =========================================================
+--  PASSO 3: troque os e-mails abaixo pelos de vocês dois
 --  e rode só estas linhas (selecione e clique em "Run").
 -- =========================================================
 -- insert into public.membros (email) values

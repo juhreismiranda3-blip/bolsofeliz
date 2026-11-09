@@ -427,7 +427,8 @@ function ouvirMudancas(){
 }
 
 async function abrirApp(){
-  const membro=await ok(sb.rpc("eh_membro"));
+  const linhas=await ok(sb.from("membros").select("email").limit(1));
+  const membro=Array.isArray(linhas)&&linhas.length>0;
   if(!membro){
     await sb.auth.signOut();
     throw new Error("Esse e-mail entrou, mas não está na lista de quem pode usar o Bolso Feliz. Inclua ele na tabela membros do Supabase.");

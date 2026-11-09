@@ -5,6 +5,6 @@
 // NUNCA coloque aqui a chave "service_role" / "secret".
 
 window.BOLSO_CONFIG = {
-  SUPABASE_URL: "COLE_AQUI_O_PROJECT_URL",
-  SUPABASE_ANON_KEY: "COLE_AQUI_A_CHAVE_ANON_OU_PUBLISHABLE"
+  SUPABASE_URL: "https://kadpzrjnvlxuoacvycwa.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_jbvpcHZkGLIXnxPJNnk7Mw_SVRQ2Adi"
 };

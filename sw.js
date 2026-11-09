@@ -1,8 +1,8 @@
 // Service worker do Bolso Feliz: permite instalar o app e abrir a tela mesmo com internet ruim.
 // Os dados (Supabase) nunca são guardados aqui: só os arquivos do próprio app.
-const CACHE = "bolso-feliz-v1";
+const CACHE = "bolso-feliz-v2";
 const ARQUIVOS = [
-  "./", "./index.html", "./config.js", "./manifest.webmanifest",
+  "./", "./index.html", "./config.js", "./config.js?v=2", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png", "./icons/favicon-32.png"
 ];
 
@@ -23,7 +23,7 @@ self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
   e.respondWith(
-    fetch(req)
+    fetch(req.url, { cache: "no-cache" })
       .then((resp) => {
         if (resp.ok) { const copia = resp.clone(); caches.open(CACHE).then((c) => c.put(req, copia)); }
         return resp;

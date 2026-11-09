@@ -16,6 +16,7 @@ Controle financeiro do casal, divertido e automático.
 | `index.html` | O app inteiro (tela, frases, confete, regras) |
 | `config.js` | Endereço e chave pública do seu projeto Supabase |
 | `supabase/schema.sql` | Cria as tabelas e as regras de segurança no banco |
+| `manifest.webmanifest`, `sw.js`, `icons/` | Deixam o app instalável na tela inicial do celular |
 
 ## Como colocar no ar
 
@@ -44,6 +45,14 @@ Abra `config.js` e cole os dois valores no lugar de `COLE_AQUI...`.
 2. Clique em **uploading an existing file** e arraste `index.html`, `config.js`, `README.md` e a pasta `supabase`.
 3. Em **Settings › Pages**, escolha **Deploy from a branch**, branch **main**, pasta **/ (root)** e salve.
 4. Em 1 ou 2 minutos o app fica em `https://SEU-USUARIO.github.io/bolso-feliz/`.
+
+### 4. Instalar no celular (tela inicial)
+O Bolso Feliz funciona como app: abre em tela cheia, com ícone próprio, sem a barra do navegador.
+
+- **iPhone (Safari):** abra o endereço do app, toque em **Compartilhar** (quadrado com seta) › **Adicionar à Tela de Início** › **Adicionar**.
+- **Android (Chrome):** abra o endereço do app, toque nos **três pontinhos** › **Instalar app** (ou **Adicionar à tela inicial**).
+
+Arquivos do app instalável: `manifest.webmanifest` (nome, cores e ícones), `sw.js` (deixa o app abrir mesmo com internet ruim; os dados continuam só no Supabase) e a pasta `icons/`.
 
 ## Segurança
 - Só os e-mails da tabela `membros` conseguem ler ou gravar qualquer coisa.

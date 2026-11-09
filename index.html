@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bolso Feliz — controle financeiro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EAF1FF; --paper:#FFFFFF; --ink:#1B1F3B; --muted:#5B6285; --line:#D3DCF2;
+  --green:#12955F; --green-soft:#D6F5E6; --coral:#E8434A; --coral-soft:#FFE1E2;
+  --sun:#FFC83D; --sun-soft:#FFF1C7; --lilac:#7B6CF0; --lilac-soft:#E6E2FF;
+  --bar-bg:#E3E9F8;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141833; --paper:#1D2244; --ink:#F1F3FF; --muted:#A8AFD6; --line:#343B6B;
+    --green:#3DD598; --green-soft:#153C35; --coral:#FF6B70; --coral-soft:#4A1F2D;
+    --sun:#FFD166; --sun-soft:#3F3520; --lilac:#A59BFF; --lilac-soft:#2E2A5C; --bar-bg:#2A3060;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141833; --paper:#1D2244; --ink:#F1F3FF; --muted:#A8AFD6; --line:#343B6B;
+  --green:#3DD598; --green-soft:#153C35; --coral:#FF6B70; --coral-soft:#4A1F2D;
+  --sun:#FFD166; --sun-soft:#3F3520; --lilac:#A59BFF; --lilac-soft:#2E2A5C; --bar-bg:#2A3060;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Nunito",system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3,.num{font-family:"Baloo 2","Nunito",system-ui,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 60px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.brand{font-size:1.6rem;font-weight:800;margin:0;letter-spacing:-.01em}
+.brand span{display:inline-block;transform:rotate(-8deg)}
+.monthnav{display:flex;align-items:center;gap:6px;background:var(--paper);border:2px solid var(--line);border-radius:999px;padding:4px}
+.monthnav button{border:0;background:transparent;color:var(--ink);font-size:1.1rem;width:36px;height:36px;border-radius:50%;cursor:pointer}
+.monthnav button:hover{background:var(--lilac-soft)}
+.monthnav .label{font-family:"Baloo 2",sans-serif;font-weight:700;min-width:150px;text-align:center;text-transform:capitalize}
+.sync{font-size:.85rem;color:var(--muted);margin:0}
+.footer-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px}
+
+/* Hero: o bolso que fala */
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;background:var(--paper);border:2px solid var(--line);border-radius:28px;padding:24px;margin-bottom:22px}
+.mascot-row{display:flex;gap:16px;align-items:flex-start}
+.mascot{font-size:5.2rem;line-height:1;flex:none;filter:drop-shadow(0 6px 0 var(--line))}
+.mascot.bounce{animation:bounce .6s ease}
+@keyframes bounce{0%{transform:scale(1)}30%{transform:scale(1.18) rotate(-6deg)}60%{transform:scale(.95) rotate(4deg)}100%{transform:scale(1)}}
+.bubble{position:relative;background:var(--mood-soft,var(--lilac-soft));border-radius:22px;padding:16px 18px;flex:1;min-width:0}
+.bubble::before{content:"";position:absolute;left:-10px;top:26px;border:10px solid transparent;border-right-color:var(--mood-soft,var(--lilac-soft));border-left:0}
+.bubble p{margin:0;font-family:"Baloo 2",sans-serif;font-size:1.35rem;font-weight:700;line-height:1.3}
+.bubble .debt-line{margin-top:10px;font-family:"Nunito",sans-serif;font-size:.95rem;font-weight:700;color:var(--coral)}
+.bubble button{margin-top:10px;background:transparent;border:0;color:var(--muted);font:inherit;font-size:.85rem;cursor:pointer;text-decoration:underline;padding:0}
+.sobra .k{color:var(--muted);font-weight:700;margin:0}
+.sobra .big{font-size:clamp(2.2rem,6vw,3.2rem);font-weight:800;line-height:1.05;margin:2px 0 12px;color:var(--mood-color,var(--ink))}
+.thermo{height:18px;background:var(--bar-bg);border-radius:999px;overflow:hidden}
+.thermo i{display:block;height:100%;width:0;background:var(--mood-color,var(--green));border-radius:999px;transition:width .5s ease}
+.thermo-cap{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-top:6px}
+.mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
+.mini div{border-top:2px dashed var(--line);padding-top:8px}
+.mini b{display:block;font-family:"Baloo 2",sans-serif;font-size:1.15rem}
+.mini span{font-size:.8rem;color:var(--muted)}
+
+/* Seções */
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px}
+section.box{background:var(--paper);border:2px solid var(--line);border-radius:22px;padding:20px}
+section.box.wide{grid-column:1/-1}
+section.box h2{margin:0 0 2px;font-size:1.35rem}
+section.box .sub{margin:0 0 14px;color:var(--muted);font-size:.92rem}
+form.add{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+form.add input,form.add select{font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:8px 10px;min-width:0}
+form.add input[name=desc]{flex:2 1 150px}
+form.add input[name=valor]{flex:1 1 100px}
+form.add select{flex:1 1 130px}
+form.add input[type=date]{flex:1 1 130px}
+.btn{font:inherit;font-weight:700;border:0;border-radius:12px;padding:9px 16px;cursor:pointer;background:var(--ink);color:var(--paper)}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.btn:hover{filter:brightness(1.1)}
+:focus-visible{outline:3px solid var(--lilac);outline-offset:2px}
+ul.list{list-style:none;margin:0;padding:0}
+ul.list li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+ul.list li:last-child{border-bottom:0}
+.li-main{flex:1;min-width:0}
+.li-main .t{font-weight:700;overflow-wrap:anywhere}
+.li-main .m{font-size:.82rem;color:var(--muted)}
+.val{font-family:"Baloo 2",sans-serif;font-weight:700;white-space:nowrap}
+.val.in{color:var(--green)}
+li.paid .t{text-decoration:line-through;color:var(--muted)}
+li.late .m{color:var(--coral);font-weight:700}
+.del{border:0;background:transparent;color:var(--muted);font-size:1.2rem;cursor:pointer;width:32px;height:32px;border-radius:50%;flex:none}
+.del:hover{background:var(--coral-soft);color:var(--coral)}
+.check{appearance:none;width:26px;height:26px;border:2.5px solid var(--line);border-radius:8px;cursor:pointer;flex:none;display:grid;place-content:center;background:var(--bg)}
+.check:checked{background:var(--green);border-color:var(--green)}
+.check:checked::after{content:"✓";color:#fff;font-weight:800}
+.empty{color:var(--muted);font-style:italic;padding:8px 0;margin:0}
+.row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.config{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.88rem;color:var(--muted);margin-top:12px;padding-top:12px;border-top:2px dashed var(--line)}
+.config input{width:110px;font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:5px 8px}
+
+/* Dívidas */
+.debt{padding:12px 0;border-bottom:1px solid var(--line)}
+.debt:last-child{border-bottom:0}
+.debt-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.debt .bar{height:12px;background:var(--bar-bg);border-radius:999px;overflow:hidden;margin:8px 0 6px}
+.debt .bar i{display:block;height:100%;background:var(--green);border-radius:999px;transition:width .5s}
+.debt-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
+.debt-foot form{display:flex;gap:6px}
+.debt-foot input{width:110px;font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:5px 8px}
+.debt.done .t::after{content:" 🏆"}
+
+/* Categorias */
+.cats{display:grid;gap:10px}
+.cat{display:grid;grid-template-columns:150px minmax(0,1fr) 110px;align-items:center;gap:10px}
+.cat .bar{height:14px;background:var(--bar-bg);border-radius:999px;overflow:hidden}
+.cat .bar i{display:block;height:100%;background:var(--lilac);border-radius:999px}
+.cat .val{text-align:right}
+
+/* Toast + banner */
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,140%);background:var(--ink);color:var(--paper);padding:12px 20px;border-radius:16px;font-weight:700;max-width:min(92vw,520px);text-align:center;transition:transform .35s ease;z-index:30}
+.toast.show{transform:translate(-50%,0)}
+.banner{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;z-index:25;opacity:0;transition:opacity .3s}
+.banner.show{opacity:1}
+.banner div{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:clamp(2.4rem,9vw,5rem);color:var(--green);background:var(--paper);border:4px solid var(--green);border-radius:28px;padding:10px 30px;transform:rotate(-4deg);box-shadow:0 10px 0 var(--green-soft);text-align:center;line-height:1.1}
+canvas#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
+
+@media (max-width:760px){
+  .hero,.grid{grid-template-columns:minmax(0,1fr)}
+  .mascot{font-size:4rem}
+  .cat{grid-template-columns:110px minmax(0,1fr) 90px;font-size:.9rem}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+.login{position:fixed;inset:0;z-index:40;background:var(--bg);display:grid;place-items:center;padding:20px}
+.login[hidden]{display:none}
+.login form{background:var(--paper);border:2px solid var(--line);border-radius:28px;padding:28px;max-width:380px;width:100%;text-align:center}
+.login .pig{font-size:4.5rem;line-height:1}
+.login h2{margin:8px 0 4px;font-size:1.6rem}
+.login p{margin:0 0 16px;color:var(--muted)}
+.login input{width:100%;font:inherit;font-size:1.1rem;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:10px;text-align:center}
+.login .btn{width:100%;padding:12px}
+.footer-btns{display:flex;gap:8px;flex-wrap:wrap}
+.login .err{color:var(--coral);font-weight:700;min-height:1.4em;margin:10px 0 0}
+</style>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="login" id="login">
+  <form id="loginForm">
+    <div class="pig" aria-hidden="true">🐷</div>
+    <h2>Bolso Feliz</h2>
+    <p>Entre com o seu e-mail e senha.</p>
+    <input id="emailInput" type="email" autocomplete="email" placeholder="seu@email.com" aria-label="E-mail" required>
+    <input id="senhaInput" type="password" autocomplete="current-password" placeholder="senha" aria-label="Senha" required>
+    <button class="btn" id="loginBtn" type="submit">Entrar</button>
+    <p class="err" id="loginErr" role="alert"></p>
+  </form>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div class="banner" id="banner" aria-hidden="true"><div id="bannerText">TUDO PAGO! 🎉</div></div>
+
+<div class="wrap">
+  <header class="top">
+    <h1 class="brand"><span>🐷</span> Bolso Feliz</h1>
+    <div class="monthnav" role="group" aria-label="Mês">
+      <button id="prevM" aria-label="Mês anterior">◀</button>
+      <div class="label" id="mLabel" aria-live="polite"></div>
+      <button id="nextM" aria-label="Próximo mês">▶</button>
+    </div>
+  </header>
+
+  <div class="hero" id="hero">
+    <div class="mascot-row">
+      <div class="mascot" id="mascot" aria-hidden="true">🐷</div>
+      <div class="bubble" aria-live="polite">
+        <p id="phrase"></p>
+        <div class="debt-line" id="debtLine" hidden></div>
+        <button id="otherPhrase">outra frase</button>
+      </div>
+    </div>
+    <div class="sobra">
+      <p class="k">Sobra prevista do mês</p>
+      <div class="big num" id="sobra">R$ 0,00</div>
+      <div class="thermo" aria-hidden="true"><i id="thermo"></i></div>
+      <div class="thermo-cap"><span id="pctLabel">0% do que entrou já tem dono</span><span>100%</span></div>
+      <div class="mini">
+        <div><b id="mRec">R$ 0</b><span>recebido</span></div>
+        <div><b id="mCon">R$ 0</b><span>contas do mês</span></div>
+        <div><b id="mPend">R$ 0</b><span>falta pagar</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <section class="box">
+      <h2>💸 Dinheiro que entrou</h2>
+      <p class="sub">Salário, PIX, freela, aquele dinheiro esquecido no bolso da calça.</p>
+      <form class="add" id="formIn">
+        <input name="desc" placeholder="De onde veio?" required aria-label="Descrição">
+        <input name="valor" placeholder="Valor" inputmode="decimal" required aria-label="Valor">
+        <button class="btn" type="submit">Adicionar</button>
+      </form>
+      <ul class="list" id="listIn"></ul>
+      <div class="config">
+        <label for="valorBom">Comemorar quando entrar a partir de R$</label>
+        <input id="valorBom" inputmode="decimal">
+      </div>
+    </section>
+
+    <section class="box">
+      <h2>🧾 Contas do mês</h2>
+      <p class="sub">Marque quando pagar. Pague todas e veja o que acontece.</p>
+      <form class="add" id="formOut">
+        <input name="desc" placeholder="Qual conta?" required aria-label="Descrição">
+        <input name="valor" placeholder="Valor" inputmode="decimal" required aria-label="Valor">
+        <select name="cat" aria-label="Categoria"></select>
+        <input name="venc" type="date" aria-label="Vencimento">
+        <button class="btn" type="submit">Adicionar</button>
+      </form>
+      <ul class="list" id="listOut"></ul>
+      <div class="row-actions">
+        <button class="btn ghost" id="copyPrev">Trazer contas do mês passado</button>
+      </div>
+    </section>
+
+    <section class="box">
+      <h2>⛓️ Dívidas</h2>
+      <p class="sub">Parcelamentos, empréstimos, aquele "depois te pago". Abata aos poucos.</p>
+      <form class="add" id="formDebt">
+        <input name="desc" placeholder="Nome da dívida" required aria-label="Nome da dívida">
+        <input name="valor" placeholder="Valor total" inputmode="decimal" required aria-label="Valor total">
+        <button class="btn" type="submit">Adicionar</button>
+      </form>
+      <div id="listDebt"></div>
+    </section>
+
+    <section class="box">
+      <h2>📊 Para onde o dinheiro foi</h2>
+      <p class="sub">Contas do mês por categoria.</p>
+      <div class="cats" id="cats"></div>
+    </section>
+  </div>
+  <div class="footer-row">
+    <p class="sync" id="sync">Entre para ver seus dados.</p>
+    <span class="footer-btns"><button class="btn ghost" id="backup">Baixar cópia (planilha)</button> <button class="btn ghost" id="sair">Sair</button></span>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+const CATS=[["moradia","🏠 Moradia"],["mercado","🛒 Mercado"],["contas","💡 Luz, água, internet"],["transporte","🚗 Transporte"],["cartao","💳 Cartão"],["saude","🩺 Saúde"],["lazer","🎉 Lazer"],["outros","📦 Outros"]];
+const CAT_LABEL=Object.fromEntries(CATS);
+
+const FRASES={
+  vazio:["Começa pelo que entrou: adicione o que você recebeu este mês.","Folha em branco, bolso em branco. Bora preencher?"],
+  tranquilo:["Tá sobrando dinheiro. Quem é você e o que fez com a gente?","Bolso cheio, coração leve e o boleto quietinho no canto.","Situação: rica. De espírito e, por enquanto, de conta.","Nesse ritmo dá até pra pedir o açaí com adicional.","O dinheiro tá tão tranquilo que tá até de pijama."],
+  atencao:["Calma, ainda dá. Mas o delivery vai ter que esperar.","O dinheiro não acabou, só tá fazendo dieta.","Modo economia: ativado. Modo pão com ovo: em espera.","Ainda não é crise, é só um friozinho na barriga."],
+  acabando:["O saldo tá igual Wi-Fi de rodoviária: quase sem sinal.","Dinheiro acabando. Hora de descobrir quantas receitas dá pra fazer com miojo.","Minha conta tá mais vazia que geladeira em fim de mês.","Se o dinheiro falasse, ele diria: tchau, foi bom enquanto durou.","O cofrinho pediu pra avisar que tá passando fome."],
+  negativo:["Parabéns, você inventou o dinheiro negativo.","O extrato não é filme de terror, mas bem que parece.","O banco ligou. Não atende.","Saldo no vermelho. Pelo menos combina com o batom.","Oficialmente devendo pro próprio mês."]
+};
+const DIVIDA=["Essa dívida tá crescendo mais rápido que planta regada.","Dívida desse tamanho já merece CPF próprio.","Os juros mandaram um abraço. Apertado.","A dívida tá mais fiel que muito namorado."];
+const ENTRADA_BOA=["Olha o PIX caindo! 💸 Hoje tem!","Caiu dinheiro! Segura a emoção e o cartão.","Cinco minutos de rica. Aproveita!","Dinheiro novo na área! O boleto já tá de olho, hein."];
+const ENTRADA_OK=["Anotado! Todo real conta.","Pingou! Pingo em pingo, enche o cofrinho.","Registrado. O cofrinho agradece."];
+const PAGOU=["Uma a menos! 👊","Boleto derrotado.","Paguei, tô leve.","Conta paga é conta que não assombra."];
+const TUDO_PAGO=["TUDO PAGO! Pode andar de cabeça erguida na frente do boleto.","Zero contas pendentes. Você é a lenda do mês.","Nenhum boleto sobreviveu. Vitória!"];
+const QUITADA=["Dívida quitada! Tchau, tchau, juros! 👋","Menos uma corrente no pé. Livre!"];
+
+const MOODS={
+  vazio:{emoji:"🐷",color:"var(--ink)",soft:"var(--lilac-soft)"},
+  tranquilo:{emoji:"😎",color:"var(--green)",soft:"var(--green-soft)"},
+  atencao:{emoji:"🤔",color:"var(--ink)",soft:"var(--sun-soft)"},
+  acabando:{emoji:"😰",color:"var(--coral)",soft:"var(--sun-soft)"},
+  negativo:{emoji:"💀",color:"var(--coral)",soft:"var(--coral-soft)"}
+};
+
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const $=id=>document.getElementById(id);
+const brl=v=>v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36);
+function parseValor(s){
+  s=String(s||"").replace(/R\$|\s/g,"");
+  if(s.includes(",")) s=s.replace(/\./g,"").replace(",",".");
+  const n=parseFloat(s);
+  return isFinite(n)?Math.round(n*100)/100:NaN;
+}
+function hojeMes(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
+function shiftMes(k,delta){let[y,m]=k.split("-").map(Number);m+=delta;while(m<1){m+=12;y--}while(m>12){m-=12;y++}return y+"-"+String(m).padStart(2,"0");}
+function nomeMes(k){const[y,m]=k.split("-").map(Number);return new Date(y,m-1,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"});}
+
+/* ---------- confete ---------- */
+const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const cv=$("confetti"),cx=cv.getContext("2d");let parts=[],raf=null;
+const CORES=["#FFC83D","#E8434A","#12955F","#7B6CF0","#3BA3FF","#FF8FC7"];
+function confete(n){
+  if(reduce) return;
+  cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;
+  for(let i=0;i<n;i++){
+    const fromLeft=i%2===0;
+    parts.push({x:fromLeft?0:innerWidth,y:innerHeight*0.7,vx:(fromLeft?1:-1)*(4+Math.random()*9),vy:-(9+Math.random()*12),
+      w:6+Math.random()*8,h:4+Math.random()*6,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:pick(CORES),life:0});
+  }
+  if(!raf) raf=requestAnimationFrame(tick);
+}
+function tick(){
+  const s=devicePixelRatio;cx.clearRect(0,0,cv.width,cv.height);
+  parts.forEach(p=>{p.vy+=0.28;p.vx*=0.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.life++;
+    cx.save();cx.translate(p.x*s,p.y*s);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.w*s/2,-p.h*s/2,p.w*s,p.h*s*Math.abs(Math.cos(p.life/6)));cx.restore();});
+  parts=parts.filter(p=>p.y<innerHeight+40&&p.life<400);
+  if(parts.length) raf=requestAnimationFrame(tick); else {raf=null;cx.clearRect(0,0,cv.width,cv.height);}
+}
+function chuva(){confete(160);setTimeout(()=>confete(120),450);setTimeout(()=>confete(100),900);}
+
+let toastT=null;
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),3600);}
+function banner(txt){$("bannerText").textContent=txt;const b=$("banner");b.classList.add("show");setTimeout(()=>b.classList.remove("show"),2600);}
+function pula(){const m=$("mascot");m.classList.remove("bounce");void m.offsetWidth;m.classList.add("bounce");}
+
+/* ---------- dados (Supabase) ---------- */
+let S={entradas:[],contas:[],dividas:[],config:{valorBom:2000}};
+let mesAtual=hojeMes();
+let frase={mood:null,text:""};
+let sb=null, logado=false;
+
+const CFG=window.BOLSO_CONFIG||{};
+const configurado=CFG.SUPABASE_URL&&CFG.SUPABASE_ANON_KEY&&!/COLE_AQUI/.test(CFG.SUPABASE_URL+CFG.SUPABASE_ANON_KEY);
+
+// Nomes dos campos no app  ->  nomes das colunas no banco
+const CAMPOS={
+  entradas:{id:"id",mes:"mes",desc:"descricao",valor:"valor"},
+  contas:{id:"id",mes:"mes",desc:"descricao",cat:"categoria",venc:"vencimento",valor:"valor",pago:"pago"},
+  dividas:{id:"id",nome:"nome",total:"total",pago:"pago"}
+};
+function paraBanco(col,item){
+  const o={};
+  Object.entries(CAMPOS[col]).forEach(([k,c])=>{o[c]=item[k];});
+  if(col==="contas"){o.vencimento=o.vencimento||null;o.pago=!!o.pago;}
+  return o;
+}
+function doBanco(col,row){
+  const o={};
+  Object.entries(CAMPOS[col]).forEach(([k,c])=>{o[k]=row[c];});
+  ["valor","total"].forEach(k=>{if(k in o)o[k]=Number(o[k])||0;});
+  if(col==="dividas")o.pago=Number(o.pago)||0;
+  if(col==="contas"){o.pago=!!o.pago;o.venc=o.venc||"";}
+  return o;
+}
+
+function status(t){$("sync").textContent=t;}
+function erroPt(e){
+  const m=(e&&(e.message||e.error_description))||String(e||"");
+  if(/Invalid login credentials/i.test(m))return "E-mail ou senha incorretos.";
+  if(/Email not confirmed/i.test(m))return "Esse e-mail ainda não foi confirmado no Supabase.";
+  if(/Failed to fetch|NetworkError|network/i.test(m))return "Sem conexão com o banco. Confira a internet.";
+  if(/row-level security|permission denied/i.test(m))return "Esse e-mail não tem permissão para gravar.";
+  return m;
+}
+async function ok(p){const r=await p;if(r&&r.error)throw r.error;return r?r.data:null;}
+
+let fila=Promise.resolve(), pendentes=0;
+function enfileira(fn){
+  pendentes++;status("Salvando…");
+  fila=fila.then(async()=>{
+    try{await fn();}
+    catch(e){
+      try{await new Promise(r=>setTimeout(r,1000));await fn();}
+      catch(e2){pendentes--;status("⚠️ Não consegui salvar a última alteração: "+erroPt(e2));toast("⚠️ Não salvou: "+erroPt(e2));return;}
+    }
+    pendentes--;if(!pendentes)status("Tudo salvo no banco de dados ✓");
+  });
+}
+function put(col,item){
+  const arr=S[col];const i=arr.findIndex(x=>x.id===item.id);
+  if(i>=0)arr[i]=item;else arr.push(item);
+  enfileira(()=>ok(sb.from(col).upsert(paraBanco(col,item))));
+}
+function remove(col,id){
+  S[col]=S[col].filter(x=>x.id!==id);
+  enfileira(()=>ok(sb.from(col).delete().eq("id",id)));
+}
+function putConfig(){enfileira(()=>ok(sb.from("config").update({valor_bom:S.config.valorBom}).eq("id",1)));}
+
+async function carregar(){
+  const [e,c,d,cfg]=await Promise.all([
+    ok(sb.from("entradas").select("*").order("criado_em")),
+    ok(sb.from("contas").select("*").order("criado_em")),
+    ok(sb.from("dividas").select("*").order("criado_em")),
+    ok(sb.from("config").select("valor_bom").eq("id",1).maybeSingle())
+  ]);
+  if(pendentes>0) return;          // não sobrescreve o que ainda está sendo salvo
+  S={entradas:e.map(r=>doBanco("entradas",r)),contas:c.map(r=>doBanco("contas",r)),dividas:d.map(r=>doBanco("dividas",r)),
+     config:{valorBom:Number(cfg&&cfg.valor_bom)||2000}};
+  render();
+}
+
+// Quando a outra pessoa mexe, o banco avisa e a tela se atualiza
+let recargaT=null;
+function agendarRecarga(){clearTimeout(recargaT);recargaT=setTimeout(()=>{if(!pendentes)carregar().catch(()=>{});else agendarRecarga();},500);}
+function ouvirMudancas(){
+  sb.channel("bolso-feliz")
+    .on("postgres_changes",{event:"*",schema:"public",table:"entradas"},agendarRecarga)
+    .on("postgres_changes",{event:"*",schema:"public",table:"contas"},agendarRecarga)
+    .on("postgres_changes",{event:"*",schema:"public",table:"dividas"},agendarRecarga)
+    .on("postgres_changes",{event:"*",schema:"public",table:"config"},agendarRecarga)
+    .subscribe();
+  // Reserva: confere de novo a cada minuto e quando a aba volta a ficar visível
+  setInterval(()=>{if(document.visibilityState==="visible")agendarRecarga();},60000);
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")agendarRecarga();});
+}
+
+async function abrirApp(){
+  const membro=await ok(sb.rpc("eh_membro"));
+  if(!membro){
+    await sb.auth.signOut();
+    throw new Error("Esse e-mail entrou, mas não está na lista de quem pode usar o Bolso Feliz. Inclua ele na tabela membros do Supabase.");
+  }
+  await carregar();
+  if(!logado){logado=true;ouvirMudancas();}
+  $("login").hidden=true;
+  status("Tudo salvo no banco de dados ✓");
+}
+
+async function entrar(email,senha){
+  $("loginErr").textContent="";$("loginBtn").disabled=true;$("loginBtn").textContent="Entrando…";
+  try{
+    await ok(sb.auth.signInWithPassword({email,password:senha}));
+    await abrirApp();
+  }catch(e){$("loginErr").textContent=erroPt(e);}
+  $("loginBtn").disabled=false;$("loginBtn").textContent="Entrar";
+}
+
+$("loginForm").onsubmit=ev=>{
+  ev.preventDefault();
+  if(!sb){$("loginErr").textContent="Falta preencher o arquivo config.js com o endereço e a chave do Supabase.";return;}
+  const email=$("emailInput").value.trim(),senha=$("senhaInput").value;
+  if(email&&senha)entrar(email,senha);
+};
+$("sair").onclick=async()=>{if(sb)await sb.auth.signOut();location.reload();};
+
+function baixarBackup(){
+  const n=v=>String(v).replace(".",",");
+  const q=t=>'"'+String(t||"").replace(/"/g,'""')+'"';
+  const linhas=[["Tipo","Mês","Descrição","Categoria","Vencimento","Valor","Pago / Já abatido"].join(";")];
+  [...S.entradas].sort((a,b)=>a.mes.localeCompare(b.mes)).forEach(e=>linhas.push(["Entrada",e.mes,q(e.desc),"","",n(e.valor),""].join(";")));
+  [...S.contas].sort((a,b)=>a.mes.localeCompare(b.mes)).forEach(c=>linhas.push(["Conta",c.mes,q(c.desc),q(CAT_LABEL[c.cat]||""),c.venc||"",n(c.valor),c.pago?"Sim":"Não"].join(";")));
+  S.dividas.forEach(d=>linhas.push(["Dívida","",q(d.nome),"","",n(d.total),n(d.pago)].join(";")));
+  const blob=new Blob(["﻿"+linhas.join("\r\n")],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="bolso-feliz-backup-"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+}
+$("backup").onclick=baixarBackup;
+
+/* ---------- cálculos ---------- */
+const doMes=col=>S[col].filter(x=>x.mes===mesAtual);
+function resumo(){
+  const E=doMes("entradas"),C=doMes("contas");
+  const rec=E.reduce((a,e)=>a+e.valor,0);
+  const con=C.reduce((a,c)=>a+c.valor,0);
+  const pagas=C.filter(c=>c.pago).reduce((a,c)=>a+c.valor,0);
+  const sobra=rec-con;
+  const pct=rec>0?con/rec:(con>0?Infinity:0);
+  const divRest=S.dividas.reduce((a,d)=>a+Math.max(0,d.total-d.pago),0);
+  let mood="tranquilo";
+  if(rec===0&&con===0) mood="vazio";
+  else if(sobra<0) mood="negativo";
+  else if(pct>=0.9) mood="acabando";
+  else if(pct>=0.7) mood="atencao";
+  const dividaAlta=divRest>0&&(rec===0||divRest>rec*2);
+  return {rec,con,pagas,sobra,pct,divRest,mood,dividaAlta};
+}
+
+/* ---------- render ---------- */
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+
+function render(){
+  $("mLabel").textContent=nomeMes(mesAtual);
+  const R=resumo(),E=doMes("entradas"),C=doMes("contas");
+  const mood=MOODS[R.mood];
+  const hero=$("hero");
+  hero.style.setProperty("--mood-color",mood.color);hero.style.setProperty("--mood-soft",mood.soft);
+  $("mascot").textContent=mood.emoji;
+  if(frase.mood!==R.mood){frase={mood:R.mood,text:pick(FRASES[R.mood])};}
+  $("phrase").textContent=frase.text;
+  const dl=$("debtLine");
+  if(R.dividaAlta){dl.hidden=false;if(!frase.divida)frase.divida=pick(DIVIDA);dl.textContent="⛓️ "+frase.divida+" (faltam "+brl(R.divRest)+")";}
+  else dl.hidden=true;
+  $("sobra").textContent=brl(R.sobra);
+  const pctShow=R.pct===Infinity?100:Math.round(R.pct*100);
+  $("thermo").style.width=Math.min(100,pctShow)+"%";
+  $("pctLabel").textContent=(R.pct===Infinity?"Tudo":pctShow+"%")+" do que entrou já tem dono";
+  $("mRec").textContent=brl(R.rec);$("mCon").textContent=brl(R.con);$("mPend").textContent=brl(R.con-R.pagas);
+
+  const li=$("listIn");li.replaceChildren();
+  if(!E.length) li.append(el("li","empty","Nada entrou ainda. Por enquanto."));
+  E.forEach(e=>{
+    const row=el("li");const main=el("div","li-main");main.append(el("div","t",e.desc));
+    if(e.valor>=S.config.valorBom) main.append(el("div","m","🎉 entrada boa!"));
+    const del=el("button","del","×");del.setAttribute("aria-label","Remover "+e.desc);
+    del.onclick=()=>{if(confirm("Apagar \""+e.desc+"\"?")){remove("entradas",e.id);render();}};
+    row.append(main,el("span","val in","+ "+brl(e.valor)),del);li.append(row);
+  });
+
+  const lo=$("listOut");lo.replaceChildren();
+  if(!C.length) lo.append(el("li","empty","Nenhuma conta cadastrada. Aproveite o silêncio."));
+  const hoje=new Date().toISOString().slice(0,10);
+  [...C].sort((a,b)=>(a.pago-b.pago)||String(a.venc||"9").localeCompare(String(b.venc||"9"))).forEach(c=>{
+    const late=!c.pago&&c.venc&&c.venc<hoje;
+    const row=el("li",(c.pago?"paid ":"")+(late?"late":""));
+    const ck=el("input","check");ck.type="checkbox";ck.checked=!!c.pago;ck.setAttribute("aria-label","Marcar "+c.desc+" como paga");
+    ck.onchange=()=>marcarPaga(c.id,ck.checked);
+    const main=el("div","li-main");main.append(el("div","t",c.desc));
+    let meta=CAT_LABEL[c.cat]||"📦 Outros";
+    if(c.venc){const[,m,d]=c.venc.split("-");meta+=" · vence "+d+"/"+m;}
+    if(late) meta+=" · atrasada!";
+    main.append(el("div","m",meta));
+    const del=el("button","del","×");del.setAttribute("aria-label","Remover "+c.desc);
+    del.onclick=()=>{if(confirm("Apagar \""+c.desc+"\"?")){remove("contas",c.id);render();}};
+    row.append(ck,main,el("span","val",brl(c.valor)),del);lo.append(row);
+  });
+
+  const ld=$("listDebt");ld.replaceChildren();
+  if(!S.dividas.length) ld.append(el("p","empty","Nenhuma dívida cadastrada. Que maravilha (ou que coragem de não anotar)."));
+  S.dividas.forEach(d=>{
+    const rest=Math.max(0,d.total-d.pago),p=d.total>0?Math.min(100,d.pago/d.total*100):0;
+    const box=el("div","debt"+(rest<=0?" done":""));
+    const top=el("div","debt-top");const t=el("span","t",d.nome);t.style.fontWeight="700";
+    const del=el("button","del","×");del.setAttribute("aria-label","Remover dívida "+d.nome);
+    del.onclick=()=>{if(confirm("Apagar a dívida \""+d.nome+"\"?")){remove("dividas",d.id);render();}};
+    top.append(t,del);
+    const bar=el("div","bar");const i=el("i");i.style.width=p+"%";bar.append(i);
+    const foot=el("div","debt-foot");
+    foot.append(el("span",null,rest<=0?"Quitada! Pago "+brl(d.pago):"Faltam "+brl(rest)+" de "+brl(d.total)+" ("+Math.round(p)+"%)"));
+    if(rest>0){
+      const f=el("form");const inp=el("input");inp.placeholder="Valor pago";inp.inputMode="decimal";inp.setAttribute("aria-label","Valor para abater de "+d.nome);
+      const b=el("button","btn","Abater");b.type="submit";b.style.padding="5px 12px";
+      f.append(inp,b);f.onsubmit=ev=>{ev.preventDefault();abater(d.id,parseValor(inp.value));};
+      foot.append(f);
+    }
+    box.append(top,bar,foot);ld.append(box);
+  });
+
+  const cats=$("cats");cats.replaceChildren();
+  const tot={};C.forEach(c=>{tot[c.cat]=(tot[c.cat]||0)+c.valor;});
+  const ord=Object.entries(tot).sort((a,b)=>b[1]-a[1]);
+  const max=ord.length?ord[0][1]:0;
+  if(!ord.length) cats.append(el("p","empty","Adicione contas para ver o gráfico."));
+  ord.forEach(([k,v])=>{
+    const r=el("div","cat");const bar=el("div","bar");const i=el("i");i.style.width=(max?v/max*100:0)+"%";bar.append(i);
+    r.append(el("span",null,CAT_LABEL[k]||k),bar,el("span","val",brl(v)));cats.append(r);
+  });
+
+  if(document.activeElement!==$("valorBom")) $("valorBom").value=String(S.config.valorBom).replace(".",",");
+}
+
+/* ---------- ações ---------- */
+function marcarPaga(id,pago){
+  const c=S.contas.find(x=>x.id===id);if(!c)return;
+  put("contas",{...c,pago});render();
+  if(pago){
+    const C=doMes("contas");
+    if(C.length&&C.every(x=>x.pago)){chuva();banner("TUDO PAGO! 🎉");toast(pick(TUDO_PAGO));pula();}
+    else{confete(25);toast(pick(PAGOU));}
+  }
+}
+function abater(id,v){
+  if(!(v>0)){toast("Digite quanto foi pago, tipo 150,00.");return;}
+  const d=S.dividas.find(x=>x.id===id);if(!d)return;
+  let pago=Math.round((d.pago+v)*100)/100;
+  if(pago>=d.total){put("dividas",{...d,pago:d.total});render();chuva();banner("QUITADA! 🏆");toast(pick(QUITADA));pula();}
+  else{put("dividas",{...d,pago});render();confete(30);toast("Abatido! Faltam "+brl(d.total-pago)+".");}
+}
+function fillCats(){const s=document.querySelector("#formOut select");CATS.forEach(([k,l])=>{const o=el("option",null,l);o.value=k;s.append(o);});}
+
+$("formIn").onsubmit=ev=>{
+  ev.preventDefault();const f=ev.target;const v=parseValor(f.valor.value);
+  if(!(v>0)){toast("Esse valor não parece dinheiro. Tente algo como 1.500,00.");return;}
+  put("entradas",{id:uid(),mes:mesAtual,desc:f.desc.value.trim(),valor:v});
+  f.reset();render();
+  if(v>=S.config.valorBom){confete(140);toast(pick(ENTRADA_BOA));pula();}
+  else toast(pick(ENTRADA_OK));
+};
+$("formOut").onsubmit=ev=>{
+  ev.preventDefault();const f=ev.target;const v=parseValor(f.valor.value);
+  if(!(v>0)){toast("Esse valor não parece dinheiro. Tente algo como 89,90.");return;}
+  const antes=resumo().mood;
+  put("contas",{id:uid(),mes:mesAtual,desc:f.desc.value.trim(),valor:v,cat:f.cat.value,venc:f.venc.value||"",pago:false});
+  const cat=f.cat.value;f.reset();f.cat.value=cat;render();
+  const depois=resumo().mood;
+  if(depois!==antes&&(depois==="acabando"||depois==="negativo")){pula();toast(frase.text);}
+  else toast("Conta anotada. Agora é só pagar (fácil falar).");
+};
+$("formDebt").onsubmit=ev=>{
+  ev.preventDefault();const f=ev.target;const v=parseValor(f.valor.value);
+  if(!(v>0)){toast("Coloque o valor total da dívida, tipo 3.000,00.");return;}
+  put("dividas",{id:uid(),nome:f.desc.value.trim(),total:v,pago:0});
+  f.reset();frase.divida=null;render();
+  if(resumo().dividaAlta){pula();toast(pick(DIVIDA));}
+};
+function shiftVenc(v){const[y,m,d]=v.split("-").map(Number);const k=shiftMes(y+"-"+String(m).padStart(2,"0"),1);const[ny,nm]=k.split("-").map(Number);const last=new Date(ny,nm,0).getDate();return k+"-"+String(Math.min(d,last)).padStart(2,"0");}
+$("copyPrev").onclick=()=>{
+  const ant=S.contas.filter(c=>c.mes===shiftMes(mesAtual,-1));
+  if(!ant.length){toast("O mês passado não tem contas para trazer.");return;}
+  const ja=new Set(doMes("contas").map(c=>c.desc.toLowerCase()));let n=0;
+  ant.forEach(c=>{if(!ja.has(c.desc.toLowerCase())){put("contas",{...c,id:uid(),mes:mesAtual,pago:false,venc:c.venc?shiftVenc(c.venc):""});n++;}});
+  render();toast(n?n+" conta(s) trazida(s). As velhas conhecidas voltaram.":"Todas já estavam aqui.");
+};
+$("valorBom").onchange=ev=>{const v=parseValor(ev.target.value);if(v>0){S.config.valorBom=v;putConfig();render();toast("Combinado: a partir de "+brl(v)+" tem festa.");}else render();};
+$("otherPhrase").onclick=()=>{const R=resumo();let t;do{t=pick(FRASES[R.mood]);}while(FRASES[R.mood].length>1&&t===frase.text);frase.text=t;frase.divida=null;render();pula();};
+$("prevM").onclick=()=>{mesAtual=shiftMes(mesAtual,-1);frase.mood=null;render();};
+$("nextM").onclick=()=>{mesAtual=shiftMes(mesAtual,1);frase.mood=null;render();};
+window.addEventListener("beforeunload",e=>{if(pendentes>0){e.preventDefault();e.returnValue="";}});
+
+fillCats();render();
+(async function iniciar(){
+  if(!configurado||!window.supabase){
+    $("loginErr").textContent=!configurado?"Falta preencher o arquivo config.js com o endereço e a chave do Supabase.":"Não consegui carregar o Supabase. Confira a internet.";
+    return;
+  }
+  sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY);
+  const {data}=await sb.auth.getSession();
+  if(data&&data.session){
+    $("loginBtn").textContent="Abrindo…";
+    try{await abrirApp();}catch(e){$("loginErr").textContent=erroPt(e);}
+    $("loginBtn").textContent="Entrar";
+  }
+})();
+})();
+</script>
+</body>
+</html>
